@@ -1,16 +1,19 @@
-import React from 'react';
+import React,{useContext}from 'react';
+import { SocketContext } from '../context/SocketContext';
 
-export const BandList = (({bands:data,addVote,removeBand,updateNameBand}) => {
+export const BandList = (() => {
 
-    const [bands, setBands] = React.useState(data);
-
-    const [nombreAnterior, setNombreAnterior] = React.useState(data);
+    const {socket } = useContext(SocketContext);
+   
+    const [bands, setBands] = React.useState([]);
 
     React.useEffect(() => {
-        setBands(data);
-    }, [data]);
+        socket.on('list-bands',(bands)=>{
+        setBands(bands);
+        });
+    }, [socket]);
 
-    console.log(data)
+    const [nombreAnterior, setNombreAnterior] = React.useState("");
 
     const onChange = (event)=>{
         setBands(
@@ -23,16 +26,16 @@ export const BandList = (({bands:data,addVote,removeBand,updateNameBand}) => {
         );
     }
 
+    const addVote = (id)=> socket.emit('increment-vote',id);
+    const removeBand=(id)=>socket.emit('delete-band',id);
+    const updateNameBand=(id,name)=>socket.emit('update-name-band',{id,name});
+   
     const onBlur=(event)=>{
-        
-
         if(nombreAnterior !== event.target.value){
             console.log(event.target.name);
             console.log(event.target.value);
             updateNameBand(event.target.name,event.target.value);
         }
-           
-      
     }
 
     const onFocus=(event)=>{
